@@ -36,6 +36,8 @@ class Controller
 	 */
 	public function __construct(Slim $slim)
 	{
+		// для слима
+		$this->setupDefaults();
 		$this->slim = $slim;
 	}
 
@@ -153,6 +155,29 @@ class Controller
 
 		$this->slim->run();
 		return false;
+	}
+
+	/**
+	 * Тупорылый Slim кидает кучу сраных E_NOTICE
+	 * Так как нихрена не проверяет существование переменных
+	 */
+	private function setupDefaults()
+	{
+		if (!isset($_SERVER['REQUEST_METHOD'])) {
+			$_SERVER['REQUEST_METHOD'] = 'CONSOLE';
+		}
+		if (!isset($_SERVER['REMOTE_ADDR'])) {
+			$_SERVER['REMOTE_ADDR'] = '::1';
+		}
+		if (!isset($_SERVER['REQUEST_URI'])) {
+			$_SERVER['REQUEST_URI'] = '';
+		}
+		if (!isset($_SERVER['SERVER_NAME'])) {
+			$_SERVER['SERVER_NAME'] = '';
+		}
+		if (!isset($_SERVER['SERVER_PORT'])) {
+			$_SERVER['SERVER_PORT'] = 0;
+		}
 	}
 }
 
