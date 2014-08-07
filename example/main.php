@@ -14,8 +14,21 @@ ini_set('display_errors', 1);
 $loader = include __DIR__.'/../vendor/autoload.php';
 $loader->setPsr4('Modules\\', __DIR__.'/Modules');
 
-$slim = new \Slim\Slim();
+$slim = new \SlimController\wrapper\Slim();
 $app = new \SlimController\Controller($slim);
+
+
+$app->setup(function(\SlimController\Controller $ctrl) {
+
+	// setup 404
+	$ctrl->Slim()->setupHalt(function($status, $message) {
+		if (!$message) { $message="Page not found"; }
+		print "$status: $message";
+	});
+
+});
+
+
 
 // map http route
 $app->mapRoute('/test/:a/:b/', function($a, $b) { var_dump($a, $b); });

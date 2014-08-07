@@ -9,7 +9,7 @@
  *
  */
 namespace SlimController;
-use Slim\Slim;
+use SlimController\wrapper\Slim;
 
 /**
  * Class        Controller
@@ -156,6 +156,14 @@ class Controller
 		}
 
 		$this->slim->run();
+	}
+
+	/**
+	 * @param callable $callback
+	 */
+	public function setup(\Closure $callback)
+	{
+		call_user_func($callback, $this);
 	}
 
 	/**
