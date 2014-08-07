@@ -14,8 +14,6 @@ ini_set('display_errors', 1);
 $loader = include __DIR__.'/../vendor/autoload.php';
 $loader->setPsr4('Modules\\', __DIR__.'/Modules');
 
-
-$config_path = '';
 $slim = new \Slim\Slim();
 $app = new \SlimController\Controller($slim);
 
@@ -26,11 +24,15 @@ $app->mapRoute('/:a/:b/', function($a, $b) { var_dump($a, $b); });
 $app->mapCommand('/move/:uid/:to/', function ($uid, $to) { var_dump($uid, $to); });
 $app->mapCommand('/set/:aaa/', "main::main");
 
-$app->registerModuleDispatcherCallback(function($module_name) {
 
+/**
+ * Формирование модуля
+ * По сути, тут и определяется как и где лежат модули
+ */
+$app->registerModuleDispatcherCallback(function($module_name) {
 	$class_name = sprintf('\Modules\%s\Module%s', ucfirst($module_name), ucfirst($module_name));
 	return new $class_name($this);
-
 });
 
+// запуск приложения
 $app->run();

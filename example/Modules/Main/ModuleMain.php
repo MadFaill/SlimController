@@ -31,6 +31,11 @@ class ModuleMain extends Module
 	{
 		$this->process_action($name, $options);
 	}
+
+	public function load_list()
+	{
+		return array(1,2,3,4,5,6);
+	}
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

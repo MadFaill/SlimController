@@ -26,9 +26,17 @@ final class Main extends Action
 	/** @var \Modules\Main\ModuleMain */
 	protected $module;
 
+	/**
+	 * Собственно, сам экшен
+	 */
 	public function process()
 	{
+		print "Params: \r\n";
 		var_dump($this->params);
+		print "Module call: \r\n";
+		var_dump($this->module->load_list());
+		print "Slim call: \r\n";
+		var_dump($this->module->getController()->Slim()->environment);
 	}
 }
 
