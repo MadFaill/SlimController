@@ -1,0 +1,17 @@
+{
+    "name": "mad-tools/slim-controller",
+    "authors": [
+        {
+            "name": "MadFaill",
+            "email": "madfaill@gmail.com"
+        }
+    ],
+    "require": {
+        "slim/slim": "2.4.3"
+    },
+    "autoload": {
+        "psr-0": {
+            "SlimController": "src/"
+        }
+    }
+}
