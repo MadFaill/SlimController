@@ -140,7 +140,8 @@ class Controller
 
 	public function run()
 	{
-		if (isset($_SERVER['argv']))
+		// if under console
+		if (isset($_SERVER['argv']) && $_SERVER['argv'])
 		{
 			$path = $_SERVER['argv'][1];
 			$routes = $this->slim->router->getMatchedRoutes(self::CONSOLE_METHOD, $path);
@@ -148,13 +149,13 @@ class Controller
 			/** @var \Slim\Route $route */
 			foreach ($routes as $route) {
 				if ($route->dispatch()) {
-					return true;
+					return;
 				}
 			}
+			return;
 		}
 
 		$this->slim->run();
-		return false;
 	}
 
 	/**

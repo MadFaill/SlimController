@@ -18,7 +18,7 @@ $slim = new \Slim\Slim();
 $app = new \SlimController\Controller($slim);
 
 // map http route
-$app->mapRoute('/:a/:b/', function($a, $b) { var_dump($a, $b); });
+$app->mapRoute('/test/:a/:b/', function($a, $b) { var_dump($a, $b); });
 
 // console command binding example
 $app->mapCommand('/move/:uid/:to/', function ($uid, $to) { var_dump($uid, $to); });
