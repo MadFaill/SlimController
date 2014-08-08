@@ -60,5 +60,7 @@ $app->registerModuleDispatcherCallback(function($module_name, $controller) {
 // запуск приложения
 // определение консольный запуск или же из под апача
 $mode = (!isset($_SERVER['HTTP_HOST'])) ?
-	\SlimController\Controller::MODE_CLI : \SlimController\Controller::MODE_WEB;
+	\SlimController\Controller::MODE_CLI :
+	\SlimController\Controller::MODE_WEB;
+
 $app->run($mode);
