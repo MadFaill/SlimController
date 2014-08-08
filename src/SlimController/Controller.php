@@ -9,7 +9,8 @@
  *
  */
 namespace SlimController;
-use SlimController\wrapper\Slim;
+use Slim\Slim;
+use SlimController\wrapper\Slim\Router;
 
 /**
  * Class        Controller
@@ -39,6 +40,19 @@ class Controller
 		// для слима
 		$this->setupDefaults();
 		$this->slim = $slim;
+
+		$this->slim->container->singleton('router', function ($c) {
+			return new Router();
+		});
+
+		#todo-mf: надо как-то перелопатить...
+		$this->slim->error(function($error) use ($slim) {
+			$slim->halt(500, $error);
+		});
+
+		$this->slim->notFound(function() use ($slim) {
+			$slim->halt(404, false);
+		});
 	}
 
 	/**
