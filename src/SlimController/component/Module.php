@@ -10,6 +10,7 @@
  */
 namespace SlimController\component;
 use SlimController\Controller;
+use SlimController\component\base\Component;
 
 /**
  * Class        Module
@@ -21,7 +22,7 @@ use SlimController\Controller;
  * @version     0.01
  * @package     SlimController\component
  */
-abstract class Module
+abstract class Module extends Component
 {
 	/**
 	 * @var \SlimController\Controller
@@ -51,23 +52,8 @@ abstract class Module
 	 */
 	final protected  function process_action($name, array $params = array())
 	{
-		$namespace = get_class($this);
-		$namespace = explode('\\', $namespace);
-		array_pop($namespace);
-		$namespace = '\\'.join('\\', $namespace);
-
-		$class_name = sprintf('%s\actions\%s', $namespace, ucfirst($name), ucfirst($name));
-
-		if (!class_exists($class_name)) {
-			throw new \Exception('Action class not found!');
-		}
-
-		if (!is_subclass_of($class_name, '\SlimController\component\Action')) {
-			throw new \Exception('Unsupported action type!');
-		}
-
-		/** @var \SlimController\component\Action $action */
-		$action = new $class_name($this, $params);
+		$action = $this->createAction($name);
+		$action->setParams($params);
 
 		if (!$action->__check_access()) {
 			throw new \Exception('Access denied');
@@ -76,9 +62,13 @@ abstract class Module
 		$action->process();
 	}
 
+	/**
+	 * @param $action_name
+	 * @param array $params
+	 */
 	public function run_action($action_name, array $params = array())
 	{
-		var_dump("run action", $action_name, $params);
+		$this->process_action($action_name, $params);
 	}
 
 	public function __check_access() { return true; }

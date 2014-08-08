@@ -24,13 +24,27 @@ use SlimController\wrapper\Slim\Router;
  */
 class Controller
 {
+	const MODE_WEB = 'web';
+	const MODE_CLI = 'cli';
+
+	const CONSOLE_METHOD = 'CONSOLE';
+
+	/**
+	 * Суть в неком HMVC-подобном подходе
+	 * Можно порождать кучу модулей и использовать их экшены
+	 *
+	 * @var \SlimController\component\Module[]
+	 */
+	private static $modules = array();
+
 	/** @var Slim */
 	private $slim;
 
 	/** @var \Closure  */
 	private $setup_module_callback;
 
-	const CONSOLE_METHOD = 'CONSOLE';
+	/** @var \Closure[]  */
+	private $mode_setup = array();
 
 	/**
 	 * @param Slim $slim
@@ -72,7 +86,7 @@ class Controller
 	 */
 	public function registerModuleDispatcherCallback(\Closure $callback)
 	{
-		$this->setup_module_callback = $callback->bindTo($this);
+		$this->setup_module_callback = $callback;
 	}
 
 	/**
@@ -82,18 +96,23 @@ class Controller
 	 */
 	public function createModule($module)
 	{
-		if (!is_callable($this->setup_module_callback)) {
-			throw new \Exception('Need to provide "controllerClassMap" callback for dispatch module.');
+		if (!isset(self::$modules[$module]))
+		{
+			if (!is_callable($this->setup_module_callback)) {
+				throw new \Exception('Need to provide "controllerClassMap" callback for dispatch module.');
+			}
+
+			/** @var \SlimController\component\Module $module_object */
+			$module_object = call_user_func($this->setup_module_callback, $module, $this);
+
+			if (!is_subclass_of($module_object, 'SlimController\component\Module')) {
+				throw new \Exception('Unsupported type of module');
+			}
+
+			self::$modules[$module] = $module_object;
 		}
 
-		/** @var \SlimController\component\Module $module */
-		$module = call_user_func($this->setup_module_callback, $module);
-
-		if (!is_subclass_of($module, 'SlimController\component\Module')) {
-			throw new \Exception('Unsupported type of module');
-		}
-
-		return $module;
+		return self::$modules[$module];
 	}
 
 	/**
@@ -103,7 +122,7 @@ class Controller
 	 * @param $action
 	 * @return \Slim\Route
 	 */
-	public function mapRoute($route, $action)
+	public function add_route($route, $action)
 	{
 		$me = $this;
 
@@ -147,37 +166,54 @@ class Controller
 	 * @param $command
 	 * @param $action
 	 */
-	public function mapCommand($command, $action)
+	public function add_command($command, $action)
 	{
-		$this->mapRoute($command, $action)->setHttpMethods(self::CONSOLE_METHOD);
+		$this->add_route($command, $action)->setHttpMethods(self::CONSOLE_METHOD);
 	}
 
-	public function run()
+	/**
+	 * @param string $mode
+	 */
+	public function run($mode=Controller::MODE_WEB)
 	{
-		// if under console
-		if (isset($_SERVER['argv']) && $_SERVER['argv'])
-		{
-			$path = $_SERVER['argv'][1];
-			$routes = $this->slim->router->getMatchedRoutes(self::CONSOLE_METHOD, $path);
-
-			/** @var \Slim\Route $route */
-			foreach ($routes as $route) {
-				if ($route->dispatch()) {
-					return;
-				}
-			}
-			return;
+		// если есть setup-callback - запускаем
+		if (isset($this->mode_setup[$mode]) && is_callable($this->mode_setup[$mode])) {
+			call_user_func($this->mode_setup[$mode], $this);
 		}
 
-		$this->slim->run();
+		// if under console
+		if ($mode==self::MODE_CLI)
+		{
+			$path = isset($_SERVER['argv'][1]) ?
+				$_SERVER['argv'][1] : null;
+
+			if ($path)
+			{
+				/** @var \Slim\Route[] $routes */
+				$routes = $this->slim->router
+					->getMatchedRoutes(self::CONSOLE_METHOD, $path);
+
+				foreach ($routes as $route) {
+					if ($route->dispatch()) {
+						return;
+					}
+				}
+			}
+
+			print "Unknown command. Exit. \r\n";
+		}
+		else {
+			$this->Slim()->run();
+		}
 	}
 
 	/**
 	 * @param callable $callback
+	 * @param string $mode
 	 */
-	public function setup(\Closure $callback)
+	public function setup(\Closure $callback, $mode=Controller::MODE_WEB)
 	{
-		call_user_func($callback, $this);
+		$this->mode_setup[$mode] = $callback;
 	}
 
 	/**

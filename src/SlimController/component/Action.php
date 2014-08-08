@@ -9,6 +9,7 @@
  *
  */
 namespace SlimController\component;
+use SlimController\component\base\Component;
 
 /**
  * Class        Action
@@ -20,21 +21,34 @@ namespace SlimController\component;
  * @version     0.01
  * @package     SlimController\component
  */
-abstract class Action
+abstract class Action extends Component
 {
 	/** @var Module */
 	protected $module;
+
+	/** @var  Action */
+	protected $action;
 
 	/** @var array параметры из запроса */
 	protected $params = array();
 
 	/**
-	 * @param Module $module
-	 * @param array $params
+	 * @param Component $parent
 	 */
-	final public function __construct(Module $module, array $params = array())
+	final public function __construct(Component $parent)
 	{
-		$this->module = $module;
+		if ($parent instanceof Module) {
+			$this->module = $parent;
+		}
+
+		if ($parent instanceof Action) {
+			$this->module = $parent->module;
+			$this->action = $parent;
+		}
+	}
+
+	final public function setParams(array $params)
+	{
 		$this->params = $params;
 	}
 

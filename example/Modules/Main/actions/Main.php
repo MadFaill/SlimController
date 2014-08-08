@@ -31,12 +31,20 @@ final class Main extends Action
 	 */
 	public function process()
 	{
+		/** @var \Modules\Main\actions\Main_actions\My $action */
+		$action = $this->createAction('My');
+
 		print "Params: \r\n";
 		var_dump($this->params);
+
 		print "Module call: \r\n";
 		var_dump($this->module->load_list());
-		print "Slim call: \r\n";
-		var_dump($this->module->getController()->Slim()->environment);
+
+		print "Sub-action: \r\n";
+		$action->test_me();
+
+		print "Teste data: \r\n";
+		var_dump($action->call_module());
 	}
 }
 

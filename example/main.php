@@ -14,38 +14,51 @@ ini_set('display_errors', 1);
 $loader = include __DIR__.'/../vendor/autoload.php';
 $loader->setPsr4('Modules\\', __DIR__.'/Modules');
 
-$slim = new \SlimController\wrapper\Slim();
+$slim = new \Slim\Slim();
 $app = new \SlimController\Controller($slim);
 
 
-$app->setup(function(\SlimController\Controller $ctrl) {
+# setup WEB advanced
+$app->setup(
+	function(\SlimController\Controller $ctrl)
+	{
+		$ctrl->Slim()->config('debug', true);
+		$ctrl->Slim()->add(new \SlimController\wrapper\Slim\middleware\GZipOutput());
+	},
+	\SlimController\Controller::MODE_WEB
+);
 
-	// setup 404
-	$ctrl->Slim()->setupHalt(function($status, $message) {
-		if (!$message) { $message="Page not found"; }
-		print "$status: $message";
-	});
 
-});
+# setup CLI advanced
+$app->setup(
+	function(\SlimController\Controller $ctrl)
+	{
+		var_dump('IN THE CONSOLE');
+	},
+	\SlimController\Controller::MODE_CLI
+);
 
 
 
 // map http route
-$app->mapRoute('/test/:a/:b/', function($a, $b) { var_dump($a, $b); });
+$app->add_route('/test/:a/:b/', function($a, $b) { var_dump($a, $b); });
 
 // console command binding example
-$app->mapCommand('/move/:uid/:to/', function ($uid, $to) { var_dump($uid, $to); });
-$app->mapCommand('/set/:aaa/', "main::main");
-
+$app->add_command('/move/:uid/:to/', function ($uid, $to) { var_dump($uid, $to); });
+$app->add_command('/set/:aaa/', "main::main");
 
 /**
  * Формирование модуля
  * По сути, тут и определяется как и где лежат модули
  */
-$app->registerModuleDispatcherCallback(function($module_name) {
+$app->registerModuleDispatcherCallback(function($module_name, $controller) {
 	$class_name = sprintf('\Modules\%s\Module%s', ucfirst($module_name), ucfirst($module_name));
-	return new $class_name($this);
+	return new $class_name($controller);
 });
 
+
 // запуск приложения
-$app->run();
+// определение консольный запуск или же из под апача
+$mode = (!isset($_SERVER['HTTP_HOST'])) ?
+	\SlimController\Controller::MODE_CLI : \SlimController\Controller::MODE_WEB;
+$app->run($mode);
