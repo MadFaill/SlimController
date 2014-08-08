@@ -58,15 +58,6 @@ class Controller
 		$this->slim->container->singleton('router', function ($c) {
 			return new Router();
 		});
-
-		#todo-mf: надо как-то перелопатить...
-		$this->slim->error(function($error) use ($slim) {
-			$slim->halt(500, $error);
-		});
-
-		$this->slim->notFound(function() use ($slim) {
-			$slim->halt(404, false);
-		});
 	}
 
 	/**
