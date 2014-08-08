@@ -40,6 +40,8 @@ $app->run($mode);
 
 ```
 
+**Использование**
+
 Теперь внутри модуля уже можно использовать `экшены` они же `действия`.
 Более подробный пример можно посмотреть в папке с примерами `examples`. Рассматриваются базовые действия.
 
@@ -52,7 +54,7 @@ $this->createAction('action-name')->someMethod();
 $this->createAction('action-name')->createAction('another-action');
 
 // дергает другой модуль и действие в нем
-$this->getController()->createModule('module-name')->createAction('action-name);
+$this->getController()->createModule('module-name')->createAction('action-name');
 
 ```
 
