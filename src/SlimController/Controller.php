@@ -10,6 +10,7 @@
  */
 namespace SlimController;
 use Slim\Slim;
+use SlimController\lib\CommandLine;
 use SlimController\wrapper\Slim\Router;
 
 /**
@@ -175,8 +176,8 @@ class Controller
 		// if under console
 		if ($mode==self::MODE_CLI)
 		{
-			$path = isset($_SERVER['argv'][1]) ?
-				$_SERVER['argv'][1] : null;
+			$args = CommandLine::parseArgs($_SERVER['argv']);
+			$path = array_shift($args);
 
 			if ($path)
 			{
@@ -184,8 +185,18 @@ class Controller
 				$routes = $this->slim->router
 					->getMatchedRoutes(self::CONSOLE_METHOD, $path);
 
-				foreach ($routes as $route) {
-					if ($route->dispatch()) {
+				foreach ($routes as $route)
+				{
+//					$route->setParam('cli_args', $args);
+//					if ($route->dispatch()) {
+//						return;
+//					}
+					$params   = array_values($route->getParams());
+					$params[] = $args;
+					$callback = $route->getCallable();
+
+					$return   = call_user_func_array($callback, $params);
+					if (false !== $return) {
 						return;
 					}
 				}

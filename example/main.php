@@ -44,7 +44,7 @@ $app->setup(
 $app->add_route('/test/:a/:b/', function($a, $b) { var_dump($a, $b); });
 
 // console command binding example
-$app->add_command('/move/:uid/:to/', function ($uid, $to) { var_dump($uid, $to); });
+$app->add_command('/move/:uid/:to/', function ($uid, $to, $args=null) { var_dump($uid, $to, $args); });
 $app->add_command('/set/:aaa/', "main::main");
 
 /**

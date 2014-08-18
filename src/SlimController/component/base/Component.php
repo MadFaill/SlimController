@@ -49,6 +49,18 @@ abstract class Component
 			$format = '%s_actions\%s';
 		}
 
+		return $this->createActionWithNamespace($name, $namespace, $format);
+	}
+
+	/**
+	 * @param $name
+	 * @param $namespace
+	 * @param string $format
+	 * @return \SlimController\component\Action
+	 * @throws \Exception
+	 */
+	final public function createActionWithNamespace($name, $namespace, $format = '%s\actions\%s')
+	{
 		$class_name = sprintf($format, $namespace, ucfirst($name), ucfirst($name));
 
 		if (!isset(self::$actions[$class_name]))
